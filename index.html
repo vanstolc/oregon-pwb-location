@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Welcome to Oregon and PWB</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--meta data for sharing links on Facebook-->
+    <meta property="og:title" content="Welcome to Oregon and PWB"/>
+    <!--<meta property="og:url" content="http://geoviz.ceoas.oregonstate.edu/storymap/examples/2.4/video.html"/>-->
+    <meta property="og:description" content="Location frame for PWB"/>
+    <!--<meta property="og:image" content="img/social.png"/>-->
+
+    <!--add required stylesheets-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <!--leaflet css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.12/css/all.css">
+
+    <!--add favicon for the web page-->
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+
+    <!--Fonts-->
+    <link href="https://fonts.googleapis.com/css?family='Opens Sans'" rel="stylesheet">
+
+
+    <link rel="stylesheet" type="text/css" href="css/storymap.2.4.css">
+    <!--add required libraries-->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/leaflet.js"></script>
+    <!--jquery-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+
+    <!--boostrap-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <!--leaflet.ajax for asynchronously adding geojson data-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+
+    <!--story map plugin-->
+    <script src="js/storymap.2.4.js"></script>
+</head>
+<!--------------------------------------------------------------------------------------------------------------------->
+<body>
+
+<div id="storymap" class="container-fluid">
+    <div class="row">
+        <!--story div-->
+        <div class="col-sm-6 col-md-4 storymap-story">
+
+            <section data-scene="oregon">
+                <h2>Where is PWB?</h2>
+                <p>Clean Water Services is located in Washington County in northwest Oregon, nestled between the Coast
+                    Range and the Portland Metropolitan Area. The Tualatin River flows through the county and meets the
+                    Willamette river on the county's eastern border.</p>
+                <img src="img/Clean-Water-Services-NEW-logo-285-Black.png" class="img-responsive img-thumbnail" alt="responsive image"
+                     alt-text="CWS Logo">
+
+            </section></div>
+        <!--map div-->
+        <div class="col-sm-6 col-md-8 storymap-map"></div>
+    </div>
+</div>
+
+<!-- main javascript -->
+<script type="text/javascript">
+
+    // Create Legend Contents in html format
+    var tualatin_legend = '<i style="background: #ebb827; stroke: #ebb827; opacity: 1"></i><p><b>Tualatin River</b></p>';
+    var willamette_legend = '<i style="background: #012256; stroke: #012256; opacity: 1"></i><p><b>Willamette River</b></p>';
+    var washington_legend = '<i style="background: #007ccf; stroke: #007ccf; opacity: 1"></i><p><b>Washington County</b></p>';
+
+    // For each layer, the first variable is the layer, the second is the legend. The layer variable can be any kinds of layers that leaflet.js supports.
+    // var layers = {
+    //      layer1: {layer: layer1, legend: legend1},
+    //      layer2: {layer: layer2, legend: legend2}
+    //      ...
+    // }
+
+    var layers = {
+        cartodb_light: {layer: L.tileLayer('https://api.mapbox.com/styles/v1/vanstolc/cjh3n98nk145n2sph38e9ck6c/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidmFuc3RvbGMiLCJhIjoiY2pkeGh4eWI3NGtudzJ3cDA3aXo2c21lZiJ9.lzyfqDiTBYobU1ardgiRvA')},
+        tualatin: {
+            layer: L.geoJson.ajax('assets/nhdflowline-tualatinriver-simp.json', {
+                color: '#ebb827',
+                weight: 2,
+                opacity: 1
+            }), legend: tualatin_legend},
+        willamette: {
+            layer: L.geoJson.ajax('assets/nhdflowline-willametteriver-simp.json', {
+                color: '#012256',
+                weight: 2,
+                opacity: 1
+            }), legend:willamette_legend},
+        washington: {
+            layer: L.geoJson.ajax('assets/washington_county_outlineWGS84.geojson', {
+                color:'#007CCF',
+                stroke:'#007CCF',
+                weight: 2,
+                opacity: 0.5
+            }), legend:washington_legend},
+            };
+
+    var scenes = {
+        oregon: {lat: 44.0000000, lng: -122.0000000, zoom: 7, name: 'Where is PWB?',
+            layers: [layers.cartodb_light, layers.tualatin, layers.willamette, layers.washington]},
+    };
+
+    $('#storymap').storymap({
+        scenes: scenes,
+        // baselayer: layers.cartodb_light,
+        legend: true, // if you do not want a legend feature, you can simply not define the createLegend function.
+        credits: "",
+        loader: true,
+        scalebar: false,
+        flyo: true,
+        navwidget: true,
+
+        createMap: function () {
+            // create a map in the "map" div, set the view to a given place and zoom
+            var map = L.map($(".storymap-map")[0], {
+                zoomControl: false, scrollWheelZoom: false, fadeAnimation: true,
+                zoomAnimation: true
+            }).setView([44, -122], 7);
+
+            return map;
+        }
+    });
+</script>
+</body>
+</html>
